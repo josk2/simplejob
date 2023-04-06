@@ -41,8 +41,8 @@ type job struct {
 	stopChan   chan bool
 }
 
-func NewJob(handler JobHandler) *job {
-	return &job{
+func NewJob(handler JobHandler) job {
+	return job{
 		Handler:    handler,
 		retryIndex: -1,
 		state:      StateInit,

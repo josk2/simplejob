@@ -3,21 +3,25 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
+	"time"
 
 	"simplejob/asyncjob"
 )
 
 func main() {
-	j := asyncjob.NewJob(func(ctx context.Context) error {
-		fmt.Println("Test job")
-		return errors.New("error something")
+	j1 := asyncjob.NewJob(func(ctx context.Context) error {
+		log.Println("Test job A")
+		time.Sleep(1 * time.Second)
+		return errors.New("A: error something")
+	})
+	j2 := asyncjob.NewJob(func(ctx context.Context) error {
+		log.Println("Test job B")
+		time.Sleep(3 * time.Second)
+		return nil
 	})
 
 	ctx := context.Background()
-	err := j.Execute(ctx)
-	if err != nil {
-		fmt.Println("run va loi", err)
-		j.Retry(ctx)
-	}
+	group := asyncjob.NewGroup(true, j1, j2)
+	group.Run(ctx)
 }
