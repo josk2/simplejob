@@ -1,0 +1,9 @@
+.DS_Store
+docker-data
+.idea
+.vscode
+logs/
+tmp/
+dev/prod.yaml
+
+config/*prod.yml
