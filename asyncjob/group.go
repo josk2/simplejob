@@ -1,11 +1,17 @@
 package asyncjob
 
-import "context"
+import (
+	"context"
+	"log"
+	"sync"
+)
 
 type Group struct {
 	Jobs       []job
 	isCurrency bool
 }
+
+var wg *sync.WaitGroup
 
 func NewGroup(isConcurency bool, jobs ...job) *Group {
 	return &Group{
@@ -14,10 +20,17 @@ func NewGroup(isConcurency bool, jobs ...job) *Group {
 	}
 }
 func (g Group) Run(ctx context.Context) error {
+
+	var err error
 	for _, job := range g.Jobs {
-		job.Execute(ctx)
+		jerr := job.Execute(ctx)
+		if jerr != nil {
+			log.Printf("job err: %v", jerr)
+			err = jerr
+		}
 	}
-	return nil
+
+	return err
 }
 
 func (g *Group) AddJob(jobs ...job) {

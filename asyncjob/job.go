@@ -3,6 +3,7 @@ package asyncjob
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -53,6 +54,9 @@ func NewJob(handler JobHandler) job {
 	}
 }
 
+func (j *job) State() JobState {
+	return j.state
+}
 func (j *job) SetRetryTime(retry []time.Duration) *job {
 	if len(retry) == 0 {
 		return j
@@ -77,7 +81,7 @@ func (j *job) Retry(ctx context.Context) error {
 
 	if j.retryIndex == len(j.config.Retries) {
 		j.state = StateRetryFailed
-		return errors.New("Retry quota has been reached")
+		return errors.New(fmt.Sprintf("Cannot retry over maximum"))
 	}
 
 	retryTime := j.config.Retries[j.retryIndex]
