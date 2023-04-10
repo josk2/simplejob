@@ -11,6 +11,11 @@ import (
 func main() {
 	ctx := context.Background()
 
+	jobExample(ctx)
+
+}
+
+func jobExample(ctx context.Context) {
 	j1 := asyncjob.NewJob(func(ctx context.Context) error {
 		log.Println("Test job A")
 		log.Println("job A sleeping 1s")
@@ -40,5 +45,4 @@ func main() {
 
 	group := asyncjob.NewGroup(true, j1, j2, j3)
 	group.Run(ctx)
-
 }
