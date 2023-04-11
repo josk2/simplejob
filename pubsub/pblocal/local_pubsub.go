@@ -17,13 +17,18 @@ type localPubSub struct {
 }
 
 func NewPubSub() *localPubSub {
-	return &localPubSub{
+	ps := &localPubSub{
 		messageQueue: make(chan *ps.Message, MessageBuffer),
 		mapChannel:   make(map[ps.Topic][]chan *ps.Message),
 		locker:       new(sync.RWMutex),
 	}
 
 	//run in here
+	err := ps.run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ps
 }
 
 func (l *localPubSub) Publish(ctx context.Context, topic ps.Topic, message *ps.Message) error {
@@ -67,4 +72,23 @@ func (l *localPubSub) Subscribe(ctx context.Context, topic ps.Topic) (ch <-chan 
 			}
 		}
 	}
+}
+
+func (l *localPubSub) run() error {
+	log.Println("started pubsub")
+	go func() {
+		for {
+			mess := <-l.messageQueue
+			log.Println("Message dequeue:", mess)
+			if subs, ok := l.mapChannel[mess.Channel()]; ok {
+				for i := range subs {
+					go func(c chan *ps.Message) {
+						c <- mess
+					}(subs[i])
+				}
+			}
+		}
+	}()
+
+	return nil
 }
