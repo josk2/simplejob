@@ -3,15 +3,45 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"simplejob/asyncjob"
+	"simplejob/pubsub"
+	"simplejob/subscriber"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func main() {
 	ctx := context.Background()
+	//jobExample(ctx)
 
-	jobExample(ctx)
+	db, err := gorm.Open(sqlite.Open("database/test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	log.Println(&db)
+
+	ps := pubsub.NewPubSub()
+	consumerEngine := subscriber.NewConsumerEngine(db, ps)
+	consumerEngine.Start()
+
+	//graceful shutdown
+	signChan := make(chan os.Signal, 1)
+	signal.Notify(signChan, syscall.SIGTERM, syscall.SIGINT)
+
+	//wait signal to be put
+	sign := <-signChan
+	log.Println("Get signal: ", sign)
+	//shutdown services
+	_, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	log.Println("Server stopped, bye bye!!!")
 
 }
 
