@@ -42,8 +42,8 @@ type job struct {
 	stopChan   chan bool
 }
 
-func NewJob(handler JobHandler) job {
-	return job{
+func NewJob(handler JobHandler) *job {
+	return &job{
 		Handler:    handler,
 		retryIndex: -1,
 		state:      StateInit,
@@ -57,12 +57,11 @@ func NewJob(handler JobHandler) job {
 func (j *job) State() JobState {
 	return j.state
 }
-func (j *job) SetRetryTime(retry []time.Duration) *job {
+func (j *job) SetRetryTime(retry []time.Duration) {
 	if len(retry) == 0 {
-		return j
+		return
 	}
 	j.config.Retries = retry
-	return j
 }
 
 func (j *job) Execute(ctx context.Context) error {

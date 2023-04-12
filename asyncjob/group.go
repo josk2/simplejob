@@ -7,12 +7,12 @@ import (
 )
 
 type group struct {
-	Jobs       []job
+	Jobs       []Job
 	isCurrency bool
 	wg         *sync.WaitGroup
 }
 
-func NewGroup(isConcurency bool, jobs ...job) *group {
+func NewGroup(isConcurency bool, jobs ...Job) *group {
 	return &group{
 		isCurrency: isConcurency,
 		Jobs:       jobs,
@@ -28,16 +28,16 @@ func (g *group) Run(ctx context.Context) error {
 	for i, _ := range g.Jobs {
 		if g.isCurrency {
 			//run job concurrency
-			go func(aj *job) {
+			go func(aj Job) {
 				errChan <- g.runJob(ctx, aj)
 				g.wg.Done()
-			}(&g.Jobs[i])
+			}(g.Jobs[i])
 			continue
 		}
 
 		//run sequence
 		job := g.Jobs[i]
-		errChan <- g.runJob(ctx, &job)
+		errChan <- g.runJob(ctx, job)
 		g.wg.Done()
 	}
 
@@ -53,7 +53,7 @@ func (g *group) Run(ctx context.Context) error {
 	return err
 }
 
-func (g *group) runJob(ctx context.Context, job *job) error {
+func (g *group) runJob(ctx context.Context, job Job) error {
 
 	var e error
 	if e = job.Execute(ctx); e != nil {
@@ -73,7 +73,7 @@ func (g *group) runJob(ctx context.Context, job *job) error {
 	return nil
 }
 
-func (g *group) AddJob(jobs ...job) {
+func (g *group) AddJob(jobs ...Job) {
 	for _, j := range jobs {
 		g.Jobs = append(g.Jobs, j)
 	}
