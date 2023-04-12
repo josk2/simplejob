@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"simplejob/pubsub"
-	"simplejob/pubsub/pblocal"
 )
 
 type Stock struct {
@@ -19,7 +18,7 @@ type Stock struct {
 
 func main() {
 	var CEOTopic pubsub.Topic = "CEO"
-	var pbLocal = pblocal.NewPubSub()
+	var pbLocal = pubsub.NewPubSub()
 
 	ctx := context.Background()
 
