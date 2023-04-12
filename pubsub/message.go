@@ -15,7 +15,7 @@ type Message struct {
 func NewMessage(data interface{}) *Message {
 	now := time.Now().UTC()
 	return &Message{
-		id:        fmt.Sprintf("#%v", now.UnixMicro()),
+		id:        fmt.Sprintf("%v", now.UnixMicro()),
 		data:      data,
 		createdAt: now,
 	}
@@ -31,7 +31,7 @@ func (m *Message) SetChanel(topic Topic) *Message {
 }
 
 func (m *Message) String() string {
-	return fmt.Sprintf("Message #%v", m.id)
+	return fmt.Sprintf("Message %v", m.id)
 }
 
 func (m *Message) Data() interface{} {

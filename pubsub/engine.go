@@ -73,11 +73,11 @@ func (e *engine) Subscribe(ctx context.Context, topic Topic) (ch <-chan *Message
 }
 
 func (e *engine) run() error {
-	log.Println("started pubsub")
+	//log.Println("started pubsub")
 	go func() {
 		for {
 			mess := <-e.messageQueue
-			log.Println("Message dequeue:", mess)
+			//log.Println("Message dequeue:", mess)
 			if subs, ok := e.mapChannel[mess.Channel()]; ok {
 				for i := range subs {
 					go func(c chan *Message) {
