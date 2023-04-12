@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"simplejob/asyncjob"
+	"simplejob/common"
+	"simplejob/model"
 	"simplejob/pubsub"
 	"simplejob/subscriber"
 
@@ -29,6 +31,9 @@ func main() {
 	ps := pubsub.NewPubSub()
 	consumerEngine := subscriber.NewConsumerEngine(db, ps)
 	consumerEngine.Start()
+
+	//fake publisher
+	fakePublisher(ctx, ps)
 
 	//graceful shutdown
 	signChan := make(chan os.Signal, 1)
@@ -75,4 +80,25 @@ func jobExample(ctx context.Context) {
 
 	group := asyncjob.NewGroup(true, j1, j2, j3)
 	group.Run(ctx)
+}
+
+func fakePublisher(ctx context.Context, ps pubsub.PubSub) {
+	users := []model.User{
+		{Id: 1,
+			Name:   "Anton",
+			Gender: model.UserGenderMale},
+		//{Id: 2,
+		//	Name:   "Andy",
+		//	Gender: model.UserGenderMale},
+		//{Id: 1,
+		//	Name:   "Anna",
+		//	Gender: model.UserGenderFemale},
+	}
+
+	for _, user := range users {
+		if err := ps.Publish(ctx, common.TopicNewUserRegistered, pubsub.NewMessage(user)); err != nil {
+			log.Println("Publish failed", err)
+		}
+		time.Sleep(time.Second)
+	}
 }

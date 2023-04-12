@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"simplejob/model"
 	"simplejob/pubsub"
 )
 
@@ -17,14 +18,33 @@ func SendEmailToNewUser(ctx context.Context) consumerJob {
 	return consumerJob{
 		Title: "Send email to new user",
 		Handle: func(ctx context.Context, message *pubsub.Message) error {
-			if userInfo, ok := message.Data().(HasUserInfo); ok {
-				log.Println("SendEmailToNewUserHandler: Sending email to new user", userInfo)
+			if userInfo, ok := message.Data().(model.User); ok {
+				log.Println("SendEmailToNewUserHandler: Sending email to new user", userInfo.Name)
 				time.Sleep(time.Second)
-				log.Println("SendEmailToNewUserHandler: Email sent to user ", userInfo)
+				log.Println("SendEmailToNewUserHandler: Email sent to user", userInfo.Name)
 				return nil
 			} else {
-				log.Println("Cannot get user data from message")
-				return errors.New("Cannot get user data from message ")
+				log.Println("SendEmailToNewUserHandler Cannot get user data from message", userInfo)
+				return errors.New("SendEmailToNewUserHandler Cannot get user data from message ")
+			}
+
+		},
+	}
+
+}
+
+func NotifyAdminAfterSendEmail(ctx context.Context) consumerJob {
+	return consumerJob{
+		Title: "Notify admin after send email to new user",
+		Handle: func(ctx context.Context, message *pubsub.Message) error {
+			if userInfo, ok := message.Data().(model.User); ok {
+				log.Println("NotifyAdminAfterSendEmailHandler: calling GCM", userInfo.Name)
+				time.Sleep(time.Second)
+				log.Println("NotifyAdminAfterSendEmailHandler: Noticed", userInfo.Name)
+				return nil
+			} else {
+				log.Println("NotifyAdminAfterSendEmailHandler Cannot get user data from message", userInfo)
+				return errors.New("NotifyAdminAfterSendEmailHandler Cannot get user data from message ")
 			}
 
 		},

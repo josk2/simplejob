@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"simplejob/asyncjob"
+	"simplejob/common"
 	"simplejob/pubsub"
 
 	"gorm.io/gorm"
@@ -32,7 +33,12 @@ func NewConsumerEngine(db *gorm.DB, ps pubsub.PubSub) *consumerEngine {
 }
 
 func (engine *consumerEngine) Start() error {
-	engine.startSubTopic("A", true, SendEmailToNewUser(context.Background()))
+	engine.startSubTopic(
+		common.TopicNewUserRegistered,
+		true,
+		SendEmailToNewUser(context.Background()),
+		NotifyAdminAfterSendEmail(context.Background()),
+	)
 
 	return nil
 }
@@ -48,7 +54,7 @@ func (engine *consumerEngine) startSubTopic(
 	convertJobHandler := func(cjob consumerJob, message *pubsub.Message) asyncjob.JobHandler {
 		return func(ctx context.Context) error {
 			//do something
-			log.Println("running job for: ", cjob.Title, " .Data", message.Data())
+			log.Println("running job for: ", cjob.Title, ".Data", message.Data())
 			return cjob.Handle(ctx, message)
 		}
 	}
