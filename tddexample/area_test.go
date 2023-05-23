@@ -18,7 +18,7 @@ func TestPerimeter(t *testing.T) {
 
 	t.Run("circles", func(t *testing.T) {
 		circle := Circle{10}
-		checkPerimeter(t, circle, 62.8318530718)
+		checkPerimeter(t, circle, 62.83185307179586)
 	})
 }
 
